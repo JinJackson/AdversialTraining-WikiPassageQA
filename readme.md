@@ -16,3 +16,4 @@
 + run_FGM.py   --FGM对抗训练
 + run_AttackTrain.py  --文本攻击对抗训练
 + run_FGMAttackTrain.py  --FGM+文本攻击对抗训练
++ run_FGMSelectedTrain.py  --不使用所有的对抗样本进行训练，只有对抗样本的损失提升到一定程度时才使用
