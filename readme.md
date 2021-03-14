@@ -1,5 +1,25 @@
 # Adversial Training for WikiPassageQA
 
+Running parameters:
+
+python3 run_FGMSelectedTrain.py --do_train --bert_model "bert-base-uncased"   \
+
+--model_type "MatchModel" --train_file "data/wikipassageQA/train.tsv"   \
+
+--dev_file "data/wikipassageQA/dev.tsv" --test_file "data/wikipassageQA/test.tsv"   \
+
+--attacked_file "attacked_data path"  \
+
+--do_lower_case --learning_rate 1.8e-6  \
+
+--gpu 0 --epochs 6 --batch_size 8 --accumulate 1  \
+
+--loss_rate 1.5 --shuffle True --s1_length 40 --s2_length 400  \
+
+--seed 1024 --save_dir "result/1.5rate_disorder" \
+
+ --fp16 --fptype O2
+
 + /WordNetAttack  --实现文本攻击所用代码目录
   用词显著性对样本中的词重要性进行排序，利用wordNet和Counter-fitting词向量找出同义词替换
   + dataPreprocess.py  --对原始数据处理成[Q, A , Label]的形式
@@ -18,3 +38,6 @@
 + run_FGMAttackTrain.py  --FGM+文本攻击对抗训练
 + run_FGMSelectedTrain.py  --不使用所有的对抗样本进行训练，只有对抗样本的损失提升到一定程度时才使用
 + TestLoss.py  --测试对抗样本与原始样本的Loss差异
+
+
+
