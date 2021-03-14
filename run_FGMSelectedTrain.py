@@ -37,6 +37,7 @@ if args.seed > -1:
 model_name = 'model.' + args.model_type
 BertMatchModel = __import__(model_name, globals(), locals(), [args.model_type]).BertMatchModel
 
+loss_rate = args.loss_rate
 logger = None
 doc_file='data/wikipassageQA/document_passages.json'
 
@@ -59,13 +60,13 @@ def train(model, tokenizer, checkpoint):
                           )
     train_dataLoader = DataLoader(dataset=train_data,
                                 batch_size=args.batch_size,
-                                shuffle= not args.pair)
+                                shuffle= args.shuffle)
 
     attacked_data = AttackedData(attacked_file=args.attacked_file)  #攻击样本
 
     attack_dataloader = DataLoader(dataset=attacked_data,
                                    batch_size=args.batch_size,
-                                   shuffle=False)
+                                   shuffle=args.shuffle)
 
     print('train_data:', len(train_data))
     print('attack_data:', len(attacked_data))
@@ -102,7 +103,8 @@ def train(model, tokenizer, checkpoint):
     logger.debug("  Num Epochs = %d", args.epochs)
     logger.debug("  Set_Batch size = %d", args.batch_size)
     logger.debug("  Real_Batch_size = %d", args.batch_size * args.accumulate)
-
+    logger.debug("  Loss_rate_ = " + str(args.loss_rate))
+    logger.debug("  Shuffle = " + str(args.shuffle))
 
     # 没有历史断点，则从0开始
     if checkpoint < 0:

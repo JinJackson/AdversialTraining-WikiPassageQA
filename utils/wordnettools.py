@@ -48,6 +48,8 @@ class WNtools():
                         word_synset.append(w)
         return word_synset[1:]
 
-# wntools = WNtools()
-# word = 'kill'
-# print(wntools.GenerateSimWordByWNAndPosChecking(word))
+# if __name__ == '__main__':
+#
+#     wntools = WNtools()
+#     word = 'influence'
+#     print(wntools.GenerateSimWordByWN(word))

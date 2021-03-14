@@ -32,6 +32,8 @@ parser.add_argument('--max_length', default=0, type=int)
 parser.add_argument('--s1_length', default=50, type=int)
 parser.add_argument('--s2_length', default=100, type=int)
 parser.add_argument('--accumulate', default=1, type=int)
+parser.add_argument('--loss_rate', default=0, type=float)
+parser.add_argument('--shuffle', action='store_true')
 
 parser.add_argument("--warmup_steps", default=0, type=int)
 
@@ -41,4 +43,4 @@ parser.add_argument('--fptype', default="O1")
 args = parser.parse_args()
 
 device = torch.device("cuda:" + str(args.gpu) if torch.cuda.is_available() else "cpu")
-args.device = device                                                                    
+args.device = device
