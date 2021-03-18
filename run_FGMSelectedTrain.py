@@ -72,6 +72,7 @@ def train(model, tokenizer, checkpoint):
     print('attack_data:', len(attacked_data))
     # 初始化 optimizer，scheduler
     t_total = len(train_dataLoader) * args.epochs
+    num_warmup_steps = int(args.warmup_steps * t_total)
     no_decay = ["bias", "LayerNorm.weight"]
     optimizer_grouped_parameters = [
         {
@@ -105,6 +106,7 @@ def train(model, tokenizer, checkpoint):
     logger.debug("  Real_Batch_size = %d", args.batch_size * args.accumulate)
     logger.debug("  Loss_rate_ = " + str(args.loss_rate))
     logger.debug("  Shuffle = " + str(args.shuffle))
+    logger.debug("  warmup_steps = " + str(num_warmup_steps))
 
     # 没有历史断点，则从0开始
     if checkpoint < 0:
@@ -193,6 +195,9 @@ def train(model, tokenizer, checkpoint):
 
                 
             step += 1
+            if step % 500 == 0:
+              logger.debug("loss:"+str(np.array(epoch_loss).mean()))
+              logger.debug('learning_rate:' + str(optimizer.state_dict()['param_groups'][0]['lr']))
 
             # 保存模型
         output_dir = args.save_dir + "/checkpoint-" + str(epoch)

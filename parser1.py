@@ -35,7 +35,7 @@ parser.add_argument('--accumulate', default=1, type=int)
 parser.add_argument('--loss_rate', default=0, type=float)
 parser.add_argument('--shuffle', action='store_true')
 
-parser.add_argument("--warmup_steps", default=0, type=int)
+parser.add_argument("--warmup_steps", default=0, type=float)
 
 parser.add_argument('--fp16', action='store_true')
 parser.add_argument('--fptype', default="O1")

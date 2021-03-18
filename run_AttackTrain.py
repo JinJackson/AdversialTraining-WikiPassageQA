@@ -162,7 +162,9 @@ def train(model, tokenizer, checkpoint):
                 scheduler.step()
                 model.zero_gra()
             step += 1
+
             # 保存模型
+
         output_dir = args.save_dir + "/checkpoint-" + str(epoch)
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
