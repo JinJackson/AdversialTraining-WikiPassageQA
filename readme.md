@@ -1,6 +1,8 @@
 # Adversial Training for WikiPassageQA
 
-**Running parameters:**
+Use Adversial Training for QA retrieval dataset WikiPassageQA
+
+## **Running parameters:**
 
 python3 run_FGMSelectedTrain.py --do_train \
 
@@ -43,6 +45,10 @@ python3 run_FGMSelectedTrain.py --do_train \
  --fp16 \
 
 --fptype O2
+
+
+
+## File Structure
 
 + /WordNetAttack  --实现文本攻击所用代码目录
   用词显著性对样本中的词重要性进行排序，利用wordNet和Counter-fitting词向量找出同义词替换
