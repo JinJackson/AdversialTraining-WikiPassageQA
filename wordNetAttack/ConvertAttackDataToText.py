@@ -4,7 +4,7 @@ from tqdm import tqdm
 Bert_Attack_File = '../data/attacked_data/new_rate1_pos.json'
 
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-written_file = '../data/AttackedDataTextForm/rate1_pos_text.txt'
+written_file = '../data/AttackedText/rate1_pos_text.txt'
 
 def clearSpecialTokens(sent):
     sent = sent.replace('[CLS]', '').replace('[PAD]', '').strip()

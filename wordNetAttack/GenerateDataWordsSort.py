@@ -2,18 +2,13 @@
 
 #需要从命令行传入切割文件的数字号  python GenerateAttackData.py 1
     #
-from transformers import BertModel, BertTokenizer
+from transformers import BertTokenizer
 from model.MatchModel import BertMatchModel
-from dataset import DataBert
+from all_datasets.dataset import DataBert
 from tqdm import tqdm
 import torch
-import numpy as np
 from torch.utils.data import DataLoader
-from utils import wordnettools as wntool
 import json
-
-import sys
-
 
 checkpoints = 'checkpoints/checkpoint-2'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

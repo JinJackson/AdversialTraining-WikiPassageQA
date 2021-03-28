@@ -75,7 +75,7 @@ class DataBert(Dataset):
         return np.array(tokenized_dic['input_ids']), np.array(tokenized_dic['token_type_ids']), np.array(tokenized_dic['attention_mask']), np.array([data[2]]), query, answer
 
     def __len__(self):
-        # You should change 0 to the total size of your dataset.
+        # You should change 0 to the total size of your all_datasets.
         return len(self.pairs)
 
 
@@ -98,7 +98,7 @@ class DataBert(Dataset):
 #                           tokenizer=tokenizer
 #                           )
 #
-#     dataloader = DataLoader(dataset=train_data,
+#     dataloader = DataLoader(all_datasets=train_data,
 #                             batch_size=2,
 #                             shuffle=False)
 #

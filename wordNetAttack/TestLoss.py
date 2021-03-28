@@ -1,19 +1,18 @@
-from torch.utils.data import Dataset, DataLoader
-from dataset import DataBert
-from AttackDataset import AttackedData
-from transformers import BertTokenizer,BertModel
-import torch
+from torch.utils.data import DataLoader
+from all_datasets.dataset import DataBert
+from all_datasets.AttackDataset import AttackedData
+from transformers import BertTokenizer
 from tqdm import tqdm
 from model.MatchModel import BertMatchModel
 from utils.FGM import FGM
 
 
-train_file = 'data/wikipassageQA/train.tsv'
-doc_file = 'data/wikipassageQA/document_passages.json'
-attacked_file = 'data/attacked_data/new_rate1_pos.json'
+train_file = '../data/wikipassageQA/train.tsv'
+doc_file = '../data/wikipassageQA/document_passages.json'
+attacked_file = '../data/attacked_data/new_rate1_pos.json'
 
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-model = BertMatchModel.from_pretrained('checkpoints/checkpoint-2')
+model = BertMatchModel.from_pretrained('../checkpoints/checkpoint-2')
 #model.to('cuda')
 
 s1_length = 100

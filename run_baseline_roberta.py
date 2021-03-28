@@ -23,19 +23,18 @@
 
 
 from parser1 import args
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader
 from transformers import RobertaTokenizer, AdamW, get_linear_schedule_with_warmup
-from torch.optim import Adam
 import os, random
 import glob
 import torch
 
 import numpy as np
-from tqdm import tqdm, trange
+from tqdm import tqdm
 
-from RobertaDataset import TrainData
+from all_datasets.RobertaDataset import TrainData
 
-from utils.metrics import mrr, map, ndcg
+from utils.metrics import mrr, map
 from utils.logger import getLogger
 
 def seed_torch(seed):

@@ -37,15 +37,15 @@ class AttackedData(Dataset):
 
 
     def __len__(self):
-        # You should change 0 to the total size of your dataset.
+        # You should change 0 to the total size of your all_datasets.
         return len(self.datas)
 
 
 # if __name__ == '__main__':
 #     from torch.utils.data import DataLoader
 #     attack_file = 'data/wikipassageQA/attaced_data2.json'
-#     dataset = AttackedData(attacked_file=attack_file)
-#     dataloader = DataLoader(dataset=dataset,
+#     all_datasets = AttackedData(attacked_file=attack_file)
+#     dataloader = DataLoader(all_datasets=all_datasets,
 #                             batch_size=2,
 #                             shuffle=False)
 #     for batch in dataloader:

@@ -1,6 +1,5 @@
 #测试攻击后的数据数量与原本数量是否相同
 
-import pdb
 from transformers import BertTokenizer
 origin_file = r'D:\Dev\Data\WikiPassageQA\train\train_.tsv'
 attack_file = r'D:\Dev\Data\WikiPassageQA\attack'
@@ -8,7 +7,7 @@ doc_file = 'data/wikipassageQA/document_passages.json'
 
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
-from dataset import DataBert
+from all_datasets.dataset import DataBert
 
 
 ori_lines = []

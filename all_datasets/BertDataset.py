@@ -55,9 +55,6 @@ def getAttackedData(attackedFile):
     return attackedData
 
 
-if __name__ == '__main__':
-    getAttackedData('data/AttackedDataTextForm/rate1_pos_text.txt')
-
 class TrainData(Dataset):
     def __init__(self, data_file, doc_file, tokenizer, max_length, attacked_file=None):
         pairs, docs, docs_keys = getTrainData(data_file, doc_file)
@@ -88,34 +85,11 @@ class TrainData(Dataset):
                                                            padding='max_length',
                                                            max_length=self.max_length)
 
-            return [np.array(tokenized_dic['input_ids']), np.array(tokenized_dic['attention_mask']), np.array([data[2]])], \
-                   [np.array(adv_tokenized_dic['input_ids']), np.array(adv_tokenized_dic['attention_mask']),
-                    np.array([adv_data[2]])]
+            return [np.array(tokenized_dic['input_ids']), np.array(tokenized_dic['token_type_ids']), np.array(tokenized_dic['attention_mask']), np.array([data[2]])], \
+                   [np.array(adv_tokenized_dic['input_ids']), np.array(tokenized_dic['token_type_ids']), np.array(adv_tokenized_dic['attention_mask']), np.array([adv_data[2]])]
 
-        return [np.array(tokenized_dic['input_ids']), np.array(tokenized_dic['attention_mask']), np.array([data[2]])]
+        return [np.array(tokenized_dic['input_ids']), np.array(tokenized_dic['token_type_ids']), np.array(tokenized_dic['attention_mask']), np.array([data[2]])]
 
     def __len__(self):
-        # You should change 0 to the total size of your dataset.
+        # You should change 0 to the total size of your all_datasets.
         return len(self.pairs)
-
-# if __name__ == '__main__':
-#
-#     tokenizer = RobertaTokenizer.from_pretrained(r'D:\Dev\Data\models\roberta-base')
-#     train_file = 'data/wikipassageQA/train.tsv'
-#     attacked_file = 'data/AttackedDataTextForm/rate1_pos_text.txt'
-#     doc_file = 'data/wikipassageQA/document_passages.json'
-#     batch_size = 2
-#     shuffle = True
-#     train_data = TrainData(data_file=train_file,
-#                            attacked_file=attacked_file,
-#                            doc_file=doc_file,
-#                            tokenizer=tokenizer
-#                            )
-#     train_dataLoader = DataLoader(dataset=train_data,
-#                                   batch_size=batch_size,
-#                                   shuffle=shuffle)
-#
-#     print(len(train_dataLoader))
-#     for batch in train_dataLoader:
-#         print(batch)
-#         break

@@ -1,7 +1,8 @@
 #coding=utf-8
 
+
 #--do_train \
-# --bert_model  "roberta-base" \
+# --bert_model  "bert-base-uncased" \
 # --model_type "MatchModel" \
 # --train_file "data/wikipassageQA/train.tsv" \
 # --dev_file "data/wikipassageQA/dev.tsv" \
@@ -17,10 +18,9 @@
 # --shuffle
 # --seed 1024 \
 # --save_dir "result/test"
-
 from parser1 import args
 from torch.utils.data import DataLoader
-from transformers import RobertaTokenizer, AdamW, get_linear_schedule_with_warmup
+from transformers import BertTokenizer, AdamW, get_linear_schedule_with_warmup
 import os, random
 import glob
 import torch
@@ -31,7 +31,7 @@ from tqdm import tqdm
 # from all_datasets import DataBert
 # from AttackDataset import AttackedData
 
-from all_datasets.RobertaDataset import TrainData
+from all_datasets.BertDataset import TrainData
 
 from utils.metrics import mrr, map
 from utils.logger import getLogger
@@ -55,7 +55,7 @@ if args.seed > -1:
 
 
 model_name = 'model.' + args.model_type
-RobertaMatchModel = __import__(model_name, globals(), locals(), [args.model_type]).RobertaMatchModel
+BertMatchModel = __import__(model_name, globals(), locals(), [args.model_type]).BertMatchModel
 
 loss_rate = args.loss_rate
 logger = None
@@ -139,9 +139,10 @@ def train(model, tokenizer, checkpoint):
             # 设置tensor gpu运行
             model.zero_grad()
             batch = tuple(t.to('cuda') for t in batch)
-            input_ids, attention_mask, labels = batch
+            input_ids, attention_mask, token_type_ids, labels = batch
 
             outputs = model(input_ids=input_ids.long(),
+                            token_type_ids=token_type_ids.long(),
                             attention_mask=attention_mask,
                             labels=labels)
 
@@ -155,12 +156,13 @@ def train(model, tokenizer, checkpoint):
 
             batch_attack = tuple(t.to('cuda') for t in batch_attack)
 
-            input_ids2, attention_mask2, labels2 = batch_attack
+            input_ids2, attention_mask2, token_type_ids2, labels2 = batch_attack
 
             fgm.attack()  # 根据梯度进行扰动
 
 
             outputs_attack = model(input_ids=input_ids2.long(),
+                                   token_type_ids=token_type_ids2.long(),
                                    attention_mask=attention_mask2,
                                    labels=labels2)
 
@@ -180,6 +182,7 @@ def train(model, tokenizer, checkpoint):
 
             else:    #如果没有大于2倍loss，就用FGM攻击
                 outputs_attack = model(input_ids=input_ids.long(),
+                                       token_type_ids=token_type_ids.long(),
                                        attention_mask=attention_mask,
                                        labels=labels)
 
@@ -269,10 +272,11 @@ def evaluate(model, tokenizer, eval_file, checkpoint, output_dir=None):
 
     for batch in tqdm(eval_dataLoader, desc="Evaluating"):
         batch = tuple(t.to('cuda') for t in batch[:4])
-        input_ids, attention_mask, labels = batch
+        input_ids, attention_mask, token_type_ids, labels = batch
 
         with torch.no_grad():
             outputs = model(input_ids=input_ids.long(),
+                            token_type_ids=token_type_ids.long(),
                             attention_mask=attention_mask,
                             labels=labels)
 
@@ -318,10 +322,10 @@ if __name__ == "__main__":
         checkpoint_dir = args.save_dir + "/checkpoint-" + str(checkpoint)
         if checkpoint > -1:
             logger.debug("Load Model from {}".format(checkpoint_dir))
-        tokenizer = RobertaTokenizer.from_pretrained(args.bert_model if checkpoint == -1 else checkpoint_dir,
+        tokenizer = BertTokenizer.from_pretrained(args.bert_model if checkpoint == -1 else checkpoint_dir,
                                                   do_lower_case=args.do_lower_case
                                                   )
-        model = RobertaMatchModel.from_pretrained(args.bert_model if checkpoint == -1 else checkpoint_dir)
+        model = BertMatchModel.from_pretrained(args.bert_model if checkpoint == -1 else checkpoint_dir)
         model.to('cuda')
         # 训练
         train(model, tokenizer, checkpoint)
@@ -330,10 +334,10 @@ if __name__ == "__main__":
         # eval：指定模型
         checkpoint = args.checkpoint
         checkpoint_dir = args.save_dir + "/checkpoint-" + str(checkpoint)
-        tokenizer = RobertaTokenizer.from_pretrained(checkpoint_dir,
+        tokenizer = BertTokenizer.from_pretrained(checkpoint_dir,
                                                   do_lower_case=args.do_lower_case,
                                                   )
-        model = RobertaMatchModel.from_pretrained(checkpoint_dir)
+        model = BertMatchModel.from_pretrained(checkpoint_dir)
         model.to('cuda')
         # 评估
         eval_loss, eval_map, eval_mrr = evaluate(model, tokenizer, eval_file=args.test_file,
