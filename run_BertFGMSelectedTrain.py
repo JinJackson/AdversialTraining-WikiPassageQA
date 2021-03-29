@@ -139,7 +139,7 @@ def train(model, tokenizer, checkpoint):
             # 设置tensor gpu运行
             model.zero_grad()
             batch = tuple(t.to('cuda') for t in batch)
-            input_ids, attention_mask, token_type_ids, labels = batch
+            input_ids, token_type_ids, attention_mask, labels = batch
 
             outputs = model(input_ids=input_ids.long(),
                             token_type_ids=token_type_ids.long(),
@@ -156,7 +156,7 @@ def train(model, tokenizer, checkpoint):
 
             batch_attack = tuple(t.to('cuda') for t in batch_attack)
 
-            input_ids2, attention_mask2, token_type_ids2, labels2 = batch_attack
+            input_ids2, token_type_ids2, attention_mask2, labels2 = batch_attack
 
             fgm.attack()  # 根据梯度进行扰动
 
@@ -228,7 +228,7 @@ def train(model, tokenizer, checkpoint):
         torch.save(optimizer.state_dict(), os.path.join(output_dir, "optimizer.pt"))
         torch.save(scheduler.state_dict(), os.path.join(output_dir, "scheduler.pt"))
         logger.debug("Saving optimizer and scheduler states to %s", output_dir)
-        logger.debug("Use Attack Example Batch:", str(attack_batch_count))
+        logger.debug("Use Attack Example Batch:" + str(attack_batch_count))
         # eval dev
         eval_loss, eval_map, eval_mrr = evaluate(model, tokenizer, eval_file=args.dev_file,
                                                 checkpoint=epoch,
@@ -272,7 +272,7 @@ def evaluate(model, tokenizer, eval_file, checkpoint, output_dir=None):
 
     for batch in tqdm(eval_dataLoader, desc="Evaluating"):
         batch = tuple(t.to('cuda') for t in batch[:4])
-        input_ids, attention_mask, token_type_ids, labels = batch
+        input_ids, token_type_ids, attention_mask, labels = batch
 
         with torch.no_grad():
             outputs = model(input_ids=input_ids.long(),

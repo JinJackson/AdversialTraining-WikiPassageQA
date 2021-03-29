@@ -132,7 +132,7 @@ def train(model, tokenizer, checkpoint):
             model.zero_grad()
             # 设置tensor gpu运行
             batch = tuple(t.to(args.device) for t in batch)
-            input_ids, attention_mask, token_type_ids, labels = batch
+            input_ids, token_type_ids, attention_mask, labels = batch
 
             outputs = model(input_ids=input_ids.long(),
                             token_type_ids=token_type_ids.long(),
@@ -213,7 +213,7 @@ def evaluate(model, tokenizer, eval_file, checkpoint, output_dir=None):
 
     for batch in tqdm(eval_dataLoader, desc="Evaluating"):
         batch = tuple(t.to(args.device) for t in batch)
-        input_ids, attention_mask, token_type_ids, labels = batch
+        input_ids, token_type_ids, attention_mask, labels = batch
 
         with torch.no_grad():
             outputs = model(input_ids=input_ids.long(),

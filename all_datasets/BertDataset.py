@@ -93,3 +93,26 @@ class TrainData(Dataset):
     def __len__(self):
         # You should change 0 to the total size of your all_datasets.
         return len(self.pairs)
+
+# if __name__ == '__main__':
+#     from transformers import BertTokenizer
+#     train_file = '../data/wikipassageQA/train.tsv'
+#     doc_file = '../data/wikipassageQA/document_passages.json'
+#     max_length = 400
+#     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+#     batch_size = 2
+#     shuffle = True
+#     train_data = TrainData(data_file=train_file,
+#                           doc_file=doc_file,
+#                           max_length=max_length,
+#                           tokenizer=tokenizer,
+#                           attacked_file=None
+#                           )
+#     train_dataLoader = DataLoader(dataset=train_data,
+#                                 batch_size=batch_size,
+#                                 shuffle= shuffle)
+#
+#
+#     for batch in train_dataLoader:
+#         print(batch)
+#         break
