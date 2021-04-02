@@ -93,7 +93,7 @@ def train(model, tokenizer, checkpoint):
     num_warmup_steps = args.warmup_steps * t_total
     optimizer = AdamW(model.parameters(), lr=args.learning_rate, eps=args.adam_epsilon)
     scheduler = get_linear_schedule_with_warmup(
-        optimizer, num_warmup_steps=args.warmup_steps, num_training_steps=t_total
+        optimizer, num_warmup_steps=num_warmup_steps, num_training_steps=t_total
     )
     # apex
     if args.fp16:
