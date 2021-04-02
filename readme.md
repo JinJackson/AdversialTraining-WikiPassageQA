@@ -2,6 +2,13 @@
 
 Use Adversial Training for QA retrieval dataset WikiPassageQA
 
+## Running Environments:
+
++ cuda == 9.2
+
++ pytorch ==1.5.1 + cu92
++ transformers == 3.3 
+
 ## **Running parameters:**
 
 python3 run_FGMSelectedTrain.py --do_train \
