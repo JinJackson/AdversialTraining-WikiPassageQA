@@ -126,6 +126,7 @@ def train(model, tokenizer, checkpoint):
         checkpoint = 0
     else:
         checkpoint += 1
+
     logger.debug("  Start Batch = %d", checkpoint)
     for epoch in range(checkpoint, args.epochs):
         model.train()
