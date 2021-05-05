@@ -4,7 +4,7 @@ with open(data_file, 'r', encoding='utf-8') as reader:
 
 length = len(lines)
 
-splits = 10
+splits = 20
 assert length % splits == 0
 
 file_size = int(length / splits)

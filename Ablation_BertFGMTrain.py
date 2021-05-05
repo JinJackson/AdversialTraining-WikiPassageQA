@@ -1,5 +1,6 @@
 #coding=utf-8
 
+#--do_train --bert_model "bert-base-uncased" --model_type "MatchModel" --train_file "data/wikipassageQA/train.tsv" --dev_file "data/wikipassageQA/dev.tsv" --test_file "data/wikipassageQA/test.tsv" --do_lower_case --learning_rate 2e-6 --gpu 0 --epochs 5 --batch_size 2 --accumulate 1 --max_length 100 --shuffle --seed 1024 --save_dir "result/fgm"
 
 #--do_train \
 # --bert_model  "bert-base-uncased" \
@@ -7,7 +8,6 @@
 # --train_file "data/wikipassageQA/train.tsv" \
 # --dev_file "data/wikipassageQA/dev.tsv" \
 # --test_file "data/wikipassageQA/test.tsv" \
-# --attacked_file "data/AttackedText/rate1_pos_text.txt"
 # --do_lower_case \
 # --learning_rate 2e-6 \
 # --gpu 0 \
@@ -32,7 +32,6 @@ from tqdm import tqdm
 # from AttackDataset import AttackedData
 
 from all_datasets.BertDataset import TrainData
-from all_datasets.SampleAttackDataset import AttackTrainData
 
 from utils.metrics import mrr, map
 from utils.logger import getLogger
@@ -72,7 +71,8 @@ def train(model, tokenizer, checkpoint):
     else:
         amp = None
     # 训练数据处理
-    train_data = AttackTrainData(data_file=args.train_file,
+    train_data = TrainData(data_file=args.train_file,
+                          doc_file=doc_file,
                           tokenizer=tokenizer,
                            max_length=args.max_length,
                            attacked_file=args.attacked_file
@@ -131,9 +131,11 @@ def train(model, tokenizer, checkpoint):
         model.train()
         epoch_loss = []
 
+
+        fgm = FGM(model)
         step = 0
         attack_batch_count = 0
-        for batch, batch_attack in tqdm(train_dataLoader, desc="Iteration", total=len(train_dataLoader)):
+        for batch in tqdm(train_dataLoader, desc="Iteration", total=len(train_dataLoader)):
             # 设置tensor gpu运行
             model.zero_grad()
             batch = tuple(t.to('cuda') for t in batch)
@@ -146,30 +148,39 @@ def train(model, tokenizer, checkpoint):
 
             loss_clean = outputs[0]
 
-            batch_attack = tuple(t.to('cuda') for t in batch_attack)
+            if args.fp16:
+                with amp.scale_loss(loss_clean, optimizer) as scaled_loss:
+                    scaled_loss.backward(retain_graph=True)
+            else:
+                loss_clean.backward(retain_graph=True) #计算出梯度
 
-            input_ids2, token_type_ids2, attention_mask2, labels2 = batch_attack
+            fgm.attack()  # 根据梯度进行扰动
 
-
-            outputs_attack = model(input_ids=input_ids2.long(),
-                                   token_type_ids=token_type_ids2.long(),
-                                   attention_mask=attention_mask2,
-                                   labels=labels2)
-            loss_adv = outputs_attack[0]
-
-            loss = loss_clean + loss_adv
+            outputs_adv = model(input_ids=input_ids.long(),
+                            token_type_ids=token_type_ids.long(),
+                            attention_mask=attention_mask,
+                            labels=labels)
+            loss_adv = outputs_adv[0]
 
             if args.fp16:
-                with amp.scale_loss(loss, optimizer) as scaled_loss:
+                with amp.scale_loss(loss_adv, optimizer) as scaled_loss:
                     scaled_loss.backward()
             else:
-                loss.backward()
+                loss_adv.backward()
 
-            epoch_loss.append(loss.item())
+            #print(loss_clean.item(), loss_adv.item())
+
+
+
+
+            epoch_loss.append(loss_clean.item() + loss_adv.item())
+
+            fgm.restore()
 
             optimizer.step()
             scheduler.step()
 
+                
             step += 1
             if step % 500 == 0:
               logger.debug("loss:"+str(np.array(epoch_loss).mean()))

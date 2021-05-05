@@ -13,6 +13,7 @@ def getOriginDatas(data_file):
         lines = reader.readlines()
         for line in lines:
             query, answer, label = line.strip().split('\t')
+            label = int(label)
             all_datas.append([query, answer, label])
     return all_datas
 
@@ -21,7 +22,7 @@ def getAttackedData(attackedFile):
     with open(attackedFile, 'r', encoding='utf-8') as reader:
         lines = reader.readlines()
         for line in lines:
-            query, answer, label = line.strip().split('  [SEP]  ')
+            query, answer, label = line.strip().split('\t')
             label = int(label)
             attackedData.append([query, answer, label])
 
@@ -67,17 +68,16 @@ class AttackTrainData(Dataset):
 
 # if __name__ == '__main__':
 #     from transformers import BertTokenizer
-#     train_file = '../data/wikipassageQA/train.tsv'
-#     doc_file = '../data/wikipassageQA/document_passages.json'
-#     max_length = 400
+#     train_file = '../data/sample_data/origin/train.txt'
+#     attack_file = '../data/sample_data/bae/train_bae.txt'
+#     max_length = 20
 #     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 #     batch_size = 2
 #     shuffle = True
-#     train_data = TrainData(data_file=train_file,
-#                           doc_file=doc_file,
+#     train_data = AttackTrainData(data_file=train_file,
 #                           max_length=max_length,
 #                           tokenizer=tokenizer,
-#                           attacked_file=None
+#                           attacked_file=attack_file
 #                           )
 #     train_dataLoader = DataLoader(dataset=train_data,
 #                                 batch_size=batch_size,

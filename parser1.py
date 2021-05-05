@@ -7,7 +7,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--train_file', default="data/wikiQA/train.txt")
 parser.add_argument('--dev_file', default="data/wikiQA/dev.txt")
 parser.add_argument('--test_file', default="data/wikiQA/test.txt")
-parser.add_argument('--attacked_file', default="None")
+parser.add_argument('--attacked_file', default=None)
 
 
 parser.add_argument('--bert_model', default="bert-base-uncased")

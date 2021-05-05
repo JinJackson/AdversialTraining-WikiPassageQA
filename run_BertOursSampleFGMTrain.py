@@ -11,6 +11,7 @@
 # --do_lower_case \
 # --learning_rate 2e-6 \
 # --gpu 0 \
+# --loss_rate 1 \
 # --epochs 5 \
 # --batch_size 2 \
 # --accumulate 1 \
@@ -131,6 +132,7 @@ def train(model, tokenizer, checkpoint):
         model.train()
         epoch_loss = []
 
+        fgm = FGM(model)
         step = 0
         attack_batch_count = 0
         for batch, batch_attack in tqdm(train_dataLoader, desc="Iteration", total=len(train_dataLoader)):
@@ -146,24 +148,52 @@ def train(model, tokenizer, checkpoint):
 
             loss_clean = outputs[0]
 
+            if args.fp16:
+                with amp.scale_loss(loss_clean, optimizer) as scaled_loss:
+                    scaled_loss.backward(retain_graph=True)
+            else:
+                loss_clean.backward(retain_graph=True) #计算出梯度
+
             batch_attack = tuple(t.to('cuda') for t in batch_attack)
 
             input_ids2, token_type_ids2, attention_mask2, labels2 = batch_attack
+
+            fgm.attack()  # 根据梯度进行扰动
 
 
             outputs_attack = model(input_ids=input_ids2.long(),
                                    token_type_ids=token_type_ids2.long(),
                                    attention_mask=attention_mask2,
                                    labels=labels2)
+
+
             loss_adv = outputs_attack[0]
 
-            loss = loss_clean + loss_adv
+            if loss_adv > loss_clean * args.loss_rate:   #如果大于loss_rate倍的loss，那就使用FGM+文本攻击
+                model.zero_grad()  #先消除梯度，再一起反向传播
+                loss = loss_clean + loss_adv  #损失为原始样本和对抗样本之和
+                attack_batch_count += 1
 
-            if args.fp16:
-                with amp.scale_loss(loss, optimizer) as scaled_loss:
-                    scaled_loss.backward()
-            else:
-                loss.backward()
+                if args.fp16:
+                    with amp.scale_loss(loss, optimizer) as scaled_loss:
+                        scaled_loss.backward()
+                else:
+                    loss.backward()
+
+            else:    #如果没有大于2倍loss，就用FGM攻击
+                outputs_attack = model(input_ids=input_ids.long(),
+                                       token_type_ids=token_type_ids.long(),
+                                       attention_mask=attention_mask,
+                                       labels=labels)
+
+                loss_adv = outputs_attack[0]    #用FGM直接把梯度堆叠上原来的梯度
+                loss = loss_adv + loss_clean
+
+                if args.fp16:
+                    with amp.scale_loss(loss_adv, optimizer) as scaled_loss:
+                        scaled_loss.backward()
+                else:
+                    loss_adv.backward()
 
             epoch_loss.append(loss.item())
 

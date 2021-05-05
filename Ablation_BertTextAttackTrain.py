@@ -1,5 +1,6 @@
 #coding=utf-8
 
+#--do_train --bert_model "bert-base-uncased" --model_type "MatchModel" --train_file "data/wikipassageQA/train.tsv" --dev_file "data/wikipassageQA/dev.tsv" --test_file "data/wikipassageQA/test.tsv" --do_lower_case --learning_rate 2e-6 --gpu 0 --epochs 5 --batch_size 2 --accumulate 1 --max_length 100 --shuffle --seed 1024 --save_dir "result/fgm"
 
 #--do_train \
 # --bert_model  "bert-base-uncased" \
@@ -18,6 +19,7 @@
 # --shuffle
 # --seed 1024 \
 # --save_dir "result/test"
+
 from parser1 import args
 from torch.utils.data import DataLoader
 from transformers import BertTokenizer, AdamW, get_linear_schedule_with_warmup
@@ -32,7 +34,6 @@ from tqdm import tqdm
 # from AttackDataset import AttackedData
 
 from all_datasets.BertDataset import TrainData
-from all_datasets.SampleAttackDataset import AttackTrainData
 
 from utils.metrics import mrr, map
 from utils.logger import getLogger
@@ -72,7 +73,8 @@ def train(model, tokenizer, checkpoint):
     else:
         amp = None
     # 训练数据处理
-    train_data = AttackTrainData(data_file=args.train_file,
+    train_data = TrainData(data_file=args.train_file,
+                          doc_file=doc_file,
                           tokenizer=tokenizer,
                            max_length=args.max_length,
                            attacked_file=args.attacked_file
@@ -131,6 +133,7 @@ def train(model, tokenizer, checkpoint):
         model.train()
         epoch_loss = []
 
+
         step = 0
         attack_batch_count = 0
         for batch, batch_attack in tqdm(train_dataLoader, desc="Iteration", total=len(train_dataLoader)):
@@ -155,9 +158,12 @@ def train(model, tokenizer, checkpoint):
                                    token_type_ids=token_type_ids2.long(),
                                    attention_mask=attention_mask2,
                                    labels=labels2)
+
+
             loss_adv = outputs_attack[0]
 
-            loss = loss_clean + loss_adv
+
+            loss = loss_adv + loss_clean
 
             if args.fp16:
                 with amp.scale_loss(loss, optimizer) as scaled_loss:
@@ -165,11 +171,19 @@ def train(model, tokenizer, checkpoint):
             else:
                 loss.backward()
 
+
+            #print(loss_clean.item(), loss_adv.item())
+
+
+
+
             epoch_loss.append(loss.item())
+
 
             optimizer.step()
             scheduler.step()
 
+                
             step += 1
             if step % 500 == 0:
               logger.debug("loss:"+str(np.array(epoch_loss).mean()))

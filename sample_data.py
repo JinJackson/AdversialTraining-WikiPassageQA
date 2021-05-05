@@ -16,6 +16,6 @@ with open('data/sample_data/origin/train.txt', 'w', encoding='utf-8') as writer:
         writer.write(lines[index].strip() + '\n')
 
 
-with open('data/sample_data/attack/train_attack.txt', 'w', encoding='utf-8') as writer:
+with open('data/sample_data/our_attack/train_attack.txt', 'w', encoding='utf-8') as writer:
     for index in shuffle_selected:
         writer.write(lines_attack[index].strip() + '\n')
